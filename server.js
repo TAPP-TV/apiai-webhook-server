@@ -69,7 +69,9 @@ restService.post('/hook', function(req, res) {
                                                         subtitle: "We've got the right hat for everyone.",
                                                         default_action: {
                                                             type: 'web_url',
-                                                            url: video.absolute_url,
+                                                            url: (
+                                                                `https://bishopsvillage.com${video.absolute_url}`
+                                                            ),
                                                             messenger_extensions: true,
                                                             webview_height_ratio: 'tall',
                                                             fallback_url: 'bishopsvillage.com'
@@ -96,7 +98,9 @@ restService.post('/hook', function(req, res) {
                                         attachments: [
                                             {
                                                 title: video.title,
-                                                title_link: video.absolute_url,
+                                                title_link: (
+                                                    `https://bishopsvillage.com${video.absolute_url}`
+                                                ),
                                                 color: '#36a64f',
                                                 fields: [
                                                     {
