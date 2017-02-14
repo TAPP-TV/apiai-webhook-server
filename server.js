@@ -4,6 +4,7 @@ require('isomorphic-fetch');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const striptags = require('striptags');
 
 const port = process.env.PORT || 5000;
 const restService = express();
@@ -14,7 +15,9 @@ function randomIntFromInterval(min, max) {
 }
 
 restService.post('/hook', function(req, res) {
-    console.log('hook request');
+    const baseURL = process.env.PROD
+        ? `${req.protocol}://${req.hostname}:${req.port}`
+        : 'https://bishopsvillage.com';
 
     try {
         var speech = 'empty speech';
@@ -24,6 +27,7 @@ restService.post('/hook', function(req, res) {
             var requestBody = req.body;
 
             if (requestBody.result) {
+                console.log('hook request', requestBody.result);
                 var parameters = requestBody.result.parameters;
 
                 var action = requestBody.result.action;
@@ -35,9 +39,7 @@ restService.post('/hook', function(req, res) {
                     speech = '';
                     data = {};
                     const query = parameters['VideoSubject'];
-                    fetch(
-                        `https://bishopsvillage.com/api/v1/content/?all=1&search=${query}`
-                    )
+                    fetch(`${baseURL}/api/v1/content/?all=1&search=${query}`)
                         .then(req => req.json())
                         .then(json => {
                             if (json.count > 0) {
@@ -70,7 +72,7 @@ restService.post('/hook', function(req, res) {
                                                         default_action: {
                                                             type: 'web_url',
                                                             url: (
-                                                                `https://bishopsvillage.com${video.absolute_url}`
+                                                                `${baseURL}${video.absolute_url}`
                                                             ),
                                                             messenger_extensions: true,
                                                             webview_height_ratio: 'tall',
@@ -79,7 +81,7 @@ restService.post('/hook', function(req, res) {
                                                         buttons: [
                                                             {
                                                                 type: 'web_url',
-                                                                url: 'https://bishopsvillage.com',
+                                                                url: baseURL,
                                                                 title: 'View Website'
                                                             },
                                                             {
@@ -99,13 +101,15 @@ restService.post('/hook', function(req, res) {
                                             {
                                                 title: video.title,
                                                 title_link: (
-                                                    `https://bishopsvillage.com${video.absolute_url}`
+                                                    `${baseURL}${video.absolute_url}`
                                                 ),
                                                 color: '#36a64f',
                                                 fields: [
                                                     {
                                                         title: 'Description',
-                                                        value: video.description,
+                                                        value: striptags(
+                                                            video.description
+                                                        ),
                                                         short: 'false'
                                                     }
                                                 ],
